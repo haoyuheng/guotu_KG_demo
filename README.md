@@ -5,7 +5,7 @@ username: neo4j
 
 passworld: 123456 
 
-[下载导入数据]()
+[下载导入数据](http://39.106.92.143/import.zip)
 
 ### 导入脚本
 
