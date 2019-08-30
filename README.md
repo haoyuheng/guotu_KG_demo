@@ -49,7 +49,7 @@ CREATE (n:KCBL { KCBL: '0.5', title: '0.5' }),(m:KCBL { KCBL: '1', title: '1' })
 导入权属性质分类，10/20/30
 
 ```cypher
-CREATE (n:QS { QSXZ: '10', title: '10' }),(m:QS { QSXZ: '20', title: '20' }),(p:QS { QSXZ: '30', title: '30' })
+CREATE (p1:QSXZ { QSXZ: '10', title: '国有土地所有权' }),(p2:QSXZ { QSXZ: '20', title: '国有土地使用权' }),(p3:QSXZ { QSXZ: '30', title: '集体土地所有权' }),(p4:QSXZ { QSXZ: '31', title: '村民小组' }),(p5:QSXZ { QSXZ: '32', title: '村集体经济组织' }),(p6:QSXZ { QSXZ: '33', title: '乡集体经济组织' }),(p7:QSXZ { QSXZ: '34', title: '其他农民集体经济组织' }),(p8:QSXZ { QSXZ: '40', title: '集体土地使用权' })
 ```
 
 导入扣除类型，扣除类型指按田坎系数（TK）、按比例扣除的散列式其他非耕地系数（FG）或耕地系数（GD）
@@ -124,7 +124,7 @@ return r
 
 ```cypher
 LOAD CSV WITH HEADERS FROM "file:///dltb_5000.csv" AS line
-MATCH (n1:DLTB{ BSM: line.BSM }),(n2:QS {QSXZ: line.QSXZ})
+MATCH (n1:DLTB{ BSM: line.BSM }),(n2:QSXZ {QSXZ: line.QSXZ})
 MERGE (n1)-[r:HAS_QSXZ {type:'has_qsxz'}]->(n2)
 return r
 ```
@@ -180,7 +180,7 @@ return r
 
 ```cypher
 LOAD CSV WITH HEADERS FROM "file:///lxdw.csv" AS line
-MATCH (n1:LXDW{ BSM: line.BSM }),(n2:QS {QSXZ: line.QSXZ})
+MATCH (n1:LXDW{ BSM: line.BSM }),(n2:QSXZ {QSXZ: line.QSXZ})
 MERGE (n1)-[r:HAS_QSXZ {type:'has_qsxz'}]->(n2)
 return r
 ```
@@ -256,7 +256,7 @@ return r
 
 ```cypher
 LOAD CSV WITH HEADERS FROM "file:///xzdw_5000.csv" AS line
-MATCH (n1:XZDW{ BSM: line.BSM }),(n2:QS {QSXZ: line.QSXZ})
+MATCH (n1:XZDW{ BSM: line.BSM }),(n2:QSXZ {QSXZ: line.QSXZ})
 MERGE (n1)-[r:HAS_QSXZ {type:'has_qsxz'}]->(n2)
 return r
 ```
