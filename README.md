@@ -40,6 +40,30 @@ SET n.name = line.name
 RETURN n
 ```
 
+导入扣除系数，0.5/1，用于线状地物分类
+
+```cypher
+CREATE (n:KCBL { KCBL: '0.5', title: '0.5' }),(m:KCBL { KCBL: '1', title: '1' })
+```
+
+导入权属性质分类，10/20/30
+
+```cypher
+CREATE (n:QS { QSXZ: '10', title: '10' }),(m:QS { QSXZ: '20', title: '20' }),(p:QS { QSXZ: '30', title: '30' })
+```
+
+导入扣除类型，扣除类型指按田坎系数（TK）、按比例扣除的散列式其他非耕地系数（FG）或耕地系数（GD）
+
+```cypher
+CREATE (n:KCLX { KCLX: 'TK', title: '按田坎系数' }),(m:KCLX { KCLX: 'FG', title: '按非耕地系数' }),(p:KCLX { KCLX: 'GD', title: '按耕地系数' })
+```
+
+导入耕地类型，当地类为梯田耕地时，耕地类型填写“T”；TT（梯田）、PD（坡耕地）（二调本来就有） 
+
+```cypher
+CREATE (n:GDLX { GDLX: 'T', title: '梯田耕地' })
+```
+
 #### 2、导入地类图斑
 
 导入土地及其属性
@@ -69,6 +93,24 @@ MERGE (n1)-[r:HAS_DL {type:'has_dl'}]->(n2)
 return r
 ```
 
+导入扣除类型关系
+
+```cypher
+LOAD CSV WITH HEADERS FROM "file:///dltb_5000.csv" AS line
+MATCH (n1:DLTB{ BSM: line.BSM }),(n2:KCLX{KCLX: line.KCLX})
+MERGE (n1)-[r:HAS_KCLX {type:'has_kclx'}]->(n2)
+return r
+```
+
+导入耕地类型关系
+
+```cypher
+LOAD CSV WITH HEADERS FROM "file:///dltb_5000.csv" AS line
+MATCH (n1:DLTB{ BSM: line.BSM }),(n2:GDLX{GDLX: line.GDLX})
+MERGE (n1)-[r:HAS_GDLX {type:'has_gdlx'}]->(n2)
+return r
+```
+
 导入土地权属关系
 
 ```cypher
@@ -78,7 +120,16 @@ MERGE (n1)-[r:HAS_QSDW {type:'has_qsdw'}]->(n2)
 return r
 ```
 
-导入坐落单位关系
+导入土地权属性质关系
+
+```cypher
+LOAD CSV WITH HEADERS FROM "file:///dltb_5000.csv" AS line
+MATCH (n1:DLTB{ BSM: line.BSM }),(n2:QS {QSXZ: line.QSXZ})
+MERGE (n1)-[r:HAS_QSXZ {type:'has_qsxz'}]->(n2)
+return r
+```
+
+~~导入坐落单位关系(数据中和权属关系一致，未导入)~~
 
 ```cypher
 LOAD CSV WITH HEADERS FROM "file:///dltb_5000.csv" AS line
@@ -125,7 +176,16 @@ MERGE (n1)-[r:HAS_QSDW {type:'has_qsdw'}]->(n2)
 return r
 ```
 
-导入坐落单位关系
+导入土地权属性质关系
+
+```cypher
+LOAD CSV WITH HEADERS FROM "file:///lxdw.csv" AS line
+MATCH (n1:LXDW{ BSM: line.BSM }),(n2:QS {QSXZ: line.QSXZ})
+MERGE (n1)-[r:HAS_QSXZ {type:'has_qsxz'}]->(n2)
+return r
+```
+
+~~导入坐落单位关系(数据中和权属关系一致，未导入)~~
 
 ```cypher
 LOAD CSV WITH HEADERS FROM "file:///lxdw.csv" AS line
@@ -163,21 +223,40 @@ MERGE (n1)-[r:HAS_DL {type:'has_dl'}]->(n2)
 return r
 ```
 
-导入土地权属关系
+导入扣除系数分类关系
 
 ```cypher
 LOAD CSV WITH HEADERS FROM "file:///xzdw_5000.csv" AS line
-MATCH (n1:XZDW{ BSM: line.BSM }),(n2:DM {code: line.QSDWDM})
-MERGE (n1)-[r:HAS_QSDW {type:'has_qsdw'}]->(n2)
+MATCH (n1:XZDW{ BSM: line.BSM }),(n2:KCBL{KCBL: line.KCBL})
+MERGE (n1)-[r:HAS_KCBL {type:'has_kcbl'}]->(n2)
 return r
 ```
 
-导入坐落单位关系
+**导入土地权属关系**
+
+左权属关系
 
 ```cypher
 LOAD CSV WITH HEADERS FROM "file:///xzdw_5000.csv" AS line
-MATCH (n1:XZDW{ BSM: line.BSM }),(n2:DM{code: line.ZLDWDM})
-MERGE (n1)-[r:HAS_ZLDW {type:'has_zldw'}]->(n2)
+MATCH (n1:XZDW{ BSM: line.BSM }),(n2:DM {code: line.QSDWDM1})
+MERGE (n1)-[r:HAS_LEFT_QSDW {type:'has_left_qsdw'}]->(n2)
 return r
 ```
 
+右权属关系
+
+```cypher
+LOAD CSV WITH HEADERS FROM "file:///xzdw_5000.csv" AS line
+MATCH (n1:XZDW{ BSM: line.BSM }),(n2:DM {code: line.QSDWDM2})
+MERGE (n1)-[r:HAS_RIGHT_QSDW {type:'has_right_qsdw'}]->(n2)
+return r
+```
+
+导入土地权属性质关系
+
+```cypher
+LOAD CSV WITH HEADERS FROM "file:///xzdw_5000.csv" AS line
+MATCH (n1:XZDW{ BSM: line.BSM }),(n2:QS {QSXZ: line.QSXZ})
+MERGE (n1)-[r:HAS_QSXZ {type:'has_qsxz'}]->(n2)
+return r
+```
